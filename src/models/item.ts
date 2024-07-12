@@ -6,17 +6,17 @@ import {
 } from "sequelize";
 import { db } from "../config";
 
-const TABLE_NAME = "Items";
+const TABLE_NAME = "Item";
 
-class Items extends Model<
-  InferAttributes<Items>,
-  InferCreationAttributes<Items>
+class Item extends Model<
+  InferAttributes<Item>,
+  InferCreationAttributes<Item>
 > {
   declare id: string;
   declare name: string;
 }
 
-Items.init(
+Item.init(
   {
     id: {
       type: DataTypes.UUID,
@@ -33,4 +33,4 @@ Items.init(
   }
 );
 
-export default Items;
+export default Item;

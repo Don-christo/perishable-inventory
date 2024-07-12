@@ -17,4 +17,5 @@ To run the project (in production mode):
 
 To test the database connection:
 
+- Build the project
 - Run `node dist/config/testdb.js` to test the database connection

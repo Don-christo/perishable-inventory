@@ -5,7 +5,7 @@ import {
   InferCreationAttributes,
 } from "sequelize";
 import { db } from "../config";
-import Items from "./items";
+import Items from "./item";
 
 const TABLE_NAME = "Lot";
 

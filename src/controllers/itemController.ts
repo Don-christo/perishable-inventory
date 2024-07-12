@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { Items } from "../models";
+import { Item } from "../models";
 import { Lot } from "../models";
 import { StatusCodes } from "http-status-codes";
 import { v4 as uuidV4 } from "uuid";
@@ -11,27 +11,21 @@ export const addItem = async (req: Request, res: Response) => {
   const lotId = uuidV4();
 
   try {
-    let itemInstance = await Items.findOne({ where: { name: item } });
+    let itemInstance = await Item.findOne({ where: { name: item } });
 
     if (!itemInstance) {
-      itemInstance = await Items.create({
+      itemInstance = await Item.create({
         id,
         name: item,
       });
-      await Lot.create({
-        id: lotId,
-        itemId: itemInstance.id,
-        quantity,
-        expiry,
-      });
-      return res
-        .status(StatusCodes.CREATED)
-        .json({});
-    } else {
-      return res.status(StatusCodes.CONFLICT).json({
-        message: "Item already exists",
-      });
     }
+    await Lot.create({
+      id: lotId,
+      itemId: itemInstance.id,
+      quantity,
+      expiry,
+    });
+    return res.status(StatusCodes.CREATED).json({});
   } catch (error) {
     console.error("Error adding item:", error);
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
@@ -45,7 +39,7 @@ export const sellItem = async (req: Request, res: Response) => {
   const { quantity } = req.body;
 
   try {
-    const itemInstance = await Items.findOne({ where: { name: item } });
+    const itemInstance = await Item.findOne({ where: { name: item } });
 
     if (!itemInstance) {
       return res
@@ -98,7 +92,7 @@ export const getItemQuantity = async (req: Request, res: Response) => {
   const { item } = req.params;
 
   try {
-    const itemInstance = await Items.findOne({ where: { name: item } });
+    const itemInstance = await Item.findOne({ where: { name: item } });
 
     if (!itemInstance) {
       return res

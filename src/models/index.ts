@@ -1,7 +1,7 @@
-import Items from "./items";
+import Item from "./item";
 import Lot from "./lot";
 
-Lot.belongsTo(Items, { foreignKey: "itemId" });
-Items.hasMany(Lot, { foreignKey: "itemId" });
+Lot.belongsTo(Item, { foreignKey: "itemId" });
+Item.hasMany(Lot, { foreignKey: "itemId" });
 
-export { Lot, Items };
+export { Lot, Item };
