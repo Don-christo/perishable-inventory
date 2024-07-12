@@ -5,7 +5,7 @@ import {
   InferCreationAttributes,
 } from "sequelize";
 import { db } from "../config";
-import Items from "./item";
+import Item from "./item";
 
 const TABLE_NAME = "Lot";
 
@@ -26,7 +26,7 @@ Lot.init(
     itemId: {
       type: DataTypes.UUID,
       references: {
-        model: Items,
+        model: Item,
         key: "id",
       },
     },
@@ -40,6 +40,7 @@ Lot.init(
   {
     sequelize: db,
     modelName: TABLE_NAME,
+    tableName: TABLE_NAME,
     timestamps: true,
   }
 );

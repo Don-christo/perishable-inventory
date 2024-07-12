@@ -2,7 +2,7 @@ import express, { Request, Response, NextFunction } from "express";
 import createError, { HttpError } from "http-errors";
 import cors from "cors";
 import logger from "morgan";
-import { db, ENV } from "./config";
+import { ENV } from "./config";
 import { StatusCodes } from "http-status-codes";
 import itemRoutes from "./routes/itemRoutes";
 import { cleanupExpiredLots } from "./services/cleanUpService";
@@ -44,15 +44,21 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use("/", itemRoutes);
 
-db.sync({
-  // force: true,
-})
-  .then(() => {
-    console.log("Database is connected and synced");
-  })
-  .catch((err: HttpError) => {
-    console.log(err);
-  });
+export const initCleanup = () => {
+  cleanupExpiredLots();
+  setInterval(cleanupExpiredLots, 3600000);
+};
+
+// db.sync({
+// //   force: true,
+// })
+//   .then(() => {
+//     console.log("Database is connected and synced");
+//     initCleanup();
+// //   })
+//   .catch((err: HttpError) => {
+//     console.log(err);
+//   });
 
 app.use(function (_req: Request, _res: Response, next: NextFunction) {
   next(createError(404));
@@ -75,8 +81,5 @@ app.use(function (err: HttpError, req: Request, res: Response) {
     });
   }
 });
-
-cleanupExpiredLots();
-setInterval(cleanupExpiredLots, 3600000);
 
 export default app;

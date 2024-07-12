@@ -29,6 +29,7 @@ Item.init(
   {
     sequelize: db,
     modelName: TABLE_NAME,
+    tableName: TABLE_NAME,
     timestamps: true,
   }
 );
