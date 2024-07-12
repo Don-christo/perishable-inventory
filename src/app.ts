@@ -5,7 +5,6 @@ import logger from "morgan";
 import { ENV } from "./config";
 import { StatusCodes } from "http-status-codes";
 import itemRoutes from "./routes/itemRoutes";
-import { cleanupExpiredLots } from "./services/cleanUpService";
 
 const app = express();
 const port = ENV.PORT || 3000;
@@ -43,22 +42,6 @@ app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use("/", itemRoutes);
-
-export const initCleanup = () => {
-  cleanupExpiredLots();
-  setInterval(cleanupExpiredLots, 3600000);
-};
-
-// db.sync({
-// //   force: true,
-// })
-//   .then(() => {
-//     console.log("Database is connected and synced");
-//     initCleanup();
-// //   })
-//   .catch((err: HttpError) => {
-//     console.log(err);
-//   });
 
 app.use(function (_req: Request, _res: Response, next: NextFunction) {
   next(createError(404));

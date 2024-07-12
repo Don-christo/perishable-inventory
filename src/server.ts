@@ -1,9 +1,15 @@
-import app, { initCleanup } from "./app";
+import app from "./app";
 import { db } from "./config";
 import Item from "./models/item";
 import Lot from "./models/lot";
+import { cleanupExpiredLots } from "./services/cleanUpService";
 
 const PORT = process.env.PORT || 3000;
+
+export const initCleanup = () => {
+  cleanupExpiredLots();
+  setInterval(cleanupExpiredLots, 3600000);
+};
 
 async function startServer() {
   try {
