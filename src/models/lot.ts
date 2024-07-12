@@ -13,7 +13,7 @@ class Lot extends Model<InferAttributes<Lot>, InferCreationAttributes<Lot>> {
   declare id: string;
   declare itemId: string;
   declare quantity: number;
-  declare expiry: number;
+  declare expiry: Date;
 }
 
 Lot.init(
@@ -34,7 +34,7 @@ Lot.init(
       type: DataTypes.INTEGER,
     },
     expiry: {
-      type: DataTypes.BIGINT,
+      type: DataTypes.DATE,
     },
   },
   {

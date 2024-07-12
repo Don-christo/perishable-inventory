@@ -2,7 +2,7 @@ import { Op } from "sequelize";
 import { Lot } from "../models";
 
 export const cleanupExpiredLots = async () => {
-  const now = Date.now();
+  const now = new Date();
   try {
     await Lot.destroy({
       where: {

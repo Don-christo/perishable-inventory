@@ -3,6 +3,7 @@ import { Item } from "../models";
 import { Lot } from "../models";
 import { StatusCodes } from "http-status-codes";
 import { v4 as uuidV4 } from "uuid";
+import { Op } from "sequelize";
 
 export const addItem = async (req: Request, res: Response) => {
   const { item } = req.params;
@@ -19,12 +20,16 @@ export const addItem = async (req: Request, res: Response) => {
         name: item,
       });
     }
+
+    const expiryDate = new Date(expiry);
+
     await Lot.create({
       id: lotId,
       itemId: itemInstance.id,
       quantity,
-      expiry,
+      expiry: expiryDate,
     });
+
     return res.status(StatusCodes.CREATED).json({});
   } catch (error) {
     console.error("Error adding item:", error);
@@ -48,18 +53,13 @@ export const sellItem = async (req: Request, res: Response) => {
     }
 
     const lots = await Lot.findAll({
-      where: { itemId: itemInstance.id },
+      where: { itemId: itemInstance.id, expiry: { [Op.gt]: new Date() } },
       order: [["expiry", "ASC"]],
     });
 
     let remainingQuantity = quantity;
 
     for (const lot of lots) {
-      if (lot.expiry < Date.now()) {
-        await lot.destroy();
-        continue;
-      }
-
       if (lot.quantity >= remainingQuantity) {
         lot.quantity -= remainingQuantity;
         await lot.save();
@@ -77,9 +77,7 @@ export const sellItem = async (req: Request, res: Response) => {
         .json({ message: "Not enough quantity available" });
     }
 
-    return res
-      .status(StatusCodes.OK)
-      .json({ message: "Item sold successfully" });
+    return res.status(StatusCodes.OK).json({});
   } catch (error) {
     console.error("Error selling item:", error);
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
@@ -101,23 +99,12 @@ export const getItemQuantity = async (req: Request, res: Response) => {
     }
 
     const lots = await Lot.findAll({
-      where: { itemId: itemInstance.id },
+      where: { itemId: itemInstance.id, expiry: { [Op.gt]: new Date() } },
       order: [["expiry", "ASC"]],
     });
 
-    let totalQuantity = 0;
-    let validTill: number | null = null;
-
-    for (const lot of lots) {
-      if (lot.expiry < Date.now()) {
-        await lot.destroy();
-      } else {
-        totalQuantity += lot.quantity;
-        if (!validTill || lot.expiry < validTill) {
-          validTill = lot.expiry;
-        }
-      }
-    }
+    const totalQuantity = lots.reduce((acc, lot) => acc + lot.quantity, 0);
+    const validTill = lots.length > 0 ? lots[0].expiry : null;
 
     return res
       .status(StatusCodes.OK)
