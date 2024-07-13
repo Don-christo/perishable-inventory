@@ -16,8 +16,12 @@ async function startServer() {
     await db.authenticate();
     console.log("Database connected");
 
-    await Item.sync({ force: true });
-    await Lot.sync({ force: true });
+    await Item.sync({
+      // force: true,
+    });
+    await Lot.sync({
+      // force: true,
+    });
     console.log("Tables synchronized");
 
     app.listen(PORT, () => {

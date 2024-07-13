@@ -4,6 +4,7 @@ import { Lot } from "../models";
 import { StatusCodes } from "http-status-codes";
 import { v4 as uuidV4 } from "uuid";
 import { Op } from "sequelize";
+import { getCurrentDateFormatted, isValidDate } from "../utilities/helpers";
 
 export const addItem = async (req: Request, res: Response) => {
   const { item } = req.params;
@@ -12,6 +13,12 @@ export const addItem = async (req: Request, res: Response) => {
   const lotId = uuidV4();
 
   try {
+    if (!isValidDate(expiry)) {
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        message:
+          `Invalid date format for expiry. Please use 'YYYY-MM-DD' format, e.g., ${getCurrentDateFormatted()}.`,
+      });
+    }
     let itemInstance = await Item.findOne({ where: { name: item } });
 
     if (!itemInstance) {

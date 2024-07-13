@@ -3,6 +3,13 @@ import app from "../src/app";
 import { db } from "../src/config";
 import { Item, Lot } from "../src/models";
 
+const formatDate = (date: Date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
 describe("Item Controller", () => {
   beforeAll(async () => {
     await db.authenticate();
@@ -18,7 +25,10 @@ describe("Item Controller", () => {
     it("should add a new item lot", async () => {
       const response = await request(app)
         .post("/testItem/add")
-        .send({ quantity: 10, expiry: new Date(Date.now() + 10000).toISOString() });
+        .send({
+          quantity: 10,
+          expiry: formatDate(new Date(Date.now() + 24 * 60 * 60 * 1000)),
+        });
       expect(response.status).toBe(201);
       expect(response.body).toEqual({});
     });
@@ -26,13 +36,13 @@ describe("Item Controller", () => {
 
   describe("POST /:item/sell", () => {
     it("should sell an existing item", async () => {
+      const expiry = formatDate(new Date(Date.now() + 24 * 60 * 60 * 1000));
+
       // First, add an item
-      await request(app)
-        .post("/testItem/add")
-        .send({
-          quantity: 10,
-          expiry: new Date(Date.now() + 10000).toISOString(),
-        });
+      await request(app).post("/testItem/add").send({
+        quantity: 10,
+        expiry,
+      });
 
       // Then, try to sell it
       const response = await request(app)
@@ -55,7 +65,7 @@ describe("Item Controller", () => {
 
   describe("GET /:item/quantity", () => {
     it("should return the correct quantity and validTill for an existing item", async () => {
-      const expiry = new Date(Date.now() + 10000).toISOString();
+      const expiry = formatDate(new Date(Date.now() + 24 * 60 * 60 * 1000));
       await request(app).post("/testItem/add").send({ quantity: 10, expiry });
 
       const response = await request(app).get("/testItem/quantity");
@@ -63,10 +73,9 @@ describe("Item Controller", () => {
       expect(response.body).toHaveProperty("quantity");
       expect(response.body).toHaveProperty("validTill");
       expect(response.body.quantity).toBe(10);
-      expect(new Date(response.body.validTill).getTime()).toBeCloseTo(
-        new Date(expiry).getTime(),
-        -1
-      ); // Allow some margin due to processing time
+      expect(
+        new Date(response.body.validTill).toISOString().split("T")[0]
+      ).toBe(expiry);
     });
 
     it("should return 0 quantity and null validTill for a non-existent item", async () => {
